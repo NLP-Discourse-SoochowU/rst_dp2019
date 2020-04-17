@@ -5,6 +5,7 @@
    1. This RST-style discourse parser produces discourse tree structure on full-text level, given a raw text.
    2. This work explores the interal node representation learning with respect to tree depth:
 ```
+![Image text](https://github.com/NLP-Discourse-SoochowU/rst_dp2019/blob/master/data/img/fg1.png)
 
 <b>-- Required Packages</b>
 ```

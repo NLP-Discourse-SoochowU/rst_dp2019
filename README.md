@@ -13,6 +13,7 @@
    incorporation), the proposed parser obtains better performance for upper-layer tree nodes.
 ```
 ![Image text](https://github.com/NLP-Discourse-SoochowU/rst_dp2019/blob/master/data/img/fg2.png)
+
 <b>-- Required Packages</b>
 ```
    torch==0.4.0 

@@ -129,8 +129,6 @@ class edu_encoder:
     def edu2vec_unsupervised(self, edu_list, a: float = 1e-3):
         """ A SIMPLE BUT TOUGH TO BEAT BASELINE FOR SENTENCE EMBEDDINGS, Princeton University
             convert a list of sentence with word2vec items into a set of sentence vectors
-            :param edu_list: EDU列表
-            :param a: 超参
         """
         sentences = None
         for edu in edu_list:
@@ -185,7 +183,7 @@ class edu_encoder:
         if len(u) < EMBED_SIZE:
             for i in range(EMBED_SIZE - len(u)):
                 u = np.append(u, 0)  # add needed extension for multiplication below
-        # resulting sentence vectors: vs = vs -u x uT x vs 
+        # resulting sentence vectors: vs = vs -u x uT x vs
         for vs in sentence_list:
             sub = np.multiply(u, vs)  # u = u u^T, vs len(word_vec) 300, 300, 300
             self.attn_buffer.append(np.subtract(vs, sub))

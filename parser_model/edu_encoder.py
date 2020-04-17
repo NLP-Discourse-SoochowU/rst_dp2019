@@ -185,7 +185,7 @@ class edu_encoder:
         if len(u) < EMBED_SIZE:
             for i in range(EMBED_SIZE - len(u)):
                 u = np.append(u, 0)  # add needed extension for multiplication below
-        # resulting sentence vectors: vs = vs -u x uT x vs
+        # resulting sentence vectors: vs = vs -u x uT x vs 
         for vs in sentence_list:
             sub = np.multiply(u, vs)  # u = u u^T, vs len(word_vec) 300, 300, 300
             self.attn_buffer.append(np.subtract(vs, sub))

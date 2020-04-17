@@ -1,0 +1,3 @@
+    ** 运行说明 **
+        - sh xxx.sh 句法分析得到对应文件的xml文件，包含句法信息
+        - 执行buildedu.py 创建 edu

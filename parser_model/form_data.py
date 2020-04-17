@@ -15,6 +15,7 @@ from stanfordcorenlp import StanfordCoreNLP
 
 path_to_jar = 'stanford-corenlp-full-2018-02-27'
 
+
 class Builder:
     def __init__(self):
         self.root = None

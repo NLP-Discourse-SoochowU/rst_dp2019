@@ -20,6 +20,12 @@
    stanfordcorenlp==3.9.1.1
 ```
 
+<b>-- Training Your Own RST Parser</b>
+```
+    Run main.py
+
+```
+
 <b>-- RST Parsing with Raw Documents</b>
 ```
    1. Prepare your raw documents in data/raw_txt in the format of *.out
@@ -28,11 +34,9 @@
       - segmentation
       - wrap them into trees, saved in "data/trees_parsed/trees_list.pkl"
    4. Run drawer.py to draw those trees out by NLTK
+   Note: We did not provide parser codes and it can be easily implemented referring to our previous project.
 ```
-
-<b>-- Training Your Own RST Parser</b>
-
-      TODO
+[rst_dp2018](https://github.com/NLP-Discourse-SoochowU/rst_dp2018)
 
 <b>-- Reference</b>
 

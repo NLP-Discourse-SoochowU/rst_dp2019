@@ -3,13 +3,13 @@
 """
 @Author: lyzhang
 @Date:
-@Description:
+@Description: One can refer to SEGBOT + ELMo for better EDU segmentation performance.
 """
 import torch
 import os
 import discoseg.buildedu as buildedu
 from config import *
-from parser_model.model import SPINN
+from parser_model.model import Model
 from parser_model.parser import Parser
 from utils.file_util import write_iterate
 from parser_model.form_data import Builder
@@ -42,7 +42,7 @@ class parse:
         word2ids = load_data(VOC_WORD2IDS_PATH)
         pos2ids = load_data(POS_word2ids_PATH)
         word_embed = load_data(VOC_VEC_PATH)
-        model = SPINN(word2ids, pos2ids, word_embed)
+        model = Model(word2ids, pos2ids, word_embed)
         model.load_state_dict(torch.load(PRETRAINED))
         print("The model has been loaded successfully!")
         return model

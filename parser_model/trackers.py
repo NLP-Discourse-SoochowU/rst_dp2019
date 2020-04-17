@@ -24,8 +24,8 @@ class Tracker(nn.Module):
         self.gru = nn.GRUCell(input_size, hidden_size)
         self.label_emb = nn.Embedding(ALL_LABELS_NUM, LABEL_EMBED_SIZE)
         self.label_emb.requires_grad = True
-        self.init_label = nn.Parameter(torch.randn(LABEL_EMBED_SIZE))  # 初始状态的上一个操作未知
-        self.unk_label = nn.Parameter(torch.randn(LABEL_EMBED_SIZE))  # 初始状态的上一个操作未知
+        self.init_label = nn.Parameter(torch.randn(LABEL_EMBED_SIZE))
+        self.unk_label = nn.Parameter(torch.randn(LABEL_EMBED_SIZE))
         self.label2ids = load_data(Action2ids_path)
 
     def forward(self, stack, buffer_, state, label=None):

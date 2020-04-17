@@ -31,11 +31,6 @@ class tree_obj:
         return t_o
 
     def assign_edus(self, edus_list):
-        """
-        分配sent_list很重要
-        :param edus_list:
-        :return:
-        """
         for edu in edus_list:
             self.edus.append(edu)
 
@@ -52,10 +47,6 @@ class tree_obj:
             self.nodes.append(root)
 
     def get_sents_edus(self):
-        """
-        获取各个句子的edus列表信息
-        :return:
-        """
         tmp_sent_edus = list()
         for edu in self.edus:
             tmp_sent_edus.append(edu)

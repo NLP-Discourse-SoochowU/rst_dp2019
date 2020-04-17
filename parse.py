@@ -9,7 +9,7 @@ import torch
 import os
 import discoseg.buildedu as buildedu
 from config import *
-from parser_model.spinn_model import SPINN
+from parser_model.model import SPINN
 from parser_model.parser import Parser
 from utils.file_util import write_iterate
 from parser_model.form_data import Builder

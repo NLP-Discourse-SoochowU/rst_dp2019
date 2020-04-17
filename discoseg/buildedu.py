@@ -19,11 +19,6 @@ dr_ = None
 
 
 def extract(rpath):
-    """
-        对xml文件构建 conll 文件
-    :param rpath:
-    :return:
-    """
     files = [join(rpath, fname) for fname in listdir(rpath) if fname.endswith(".xml")]
     for fxml in files:
         print('Processing file: {}'.format(fxml))
@@ -108,19 +103,3 @@ def main(fmodel, fvocab, rpath, wpath):
     pool = mp.Pool(processes=4)
     pool.map(do_seg_one_, flist)
 
-# def writedoc(doc, fname, wpath):
-#     """ Write doc into a file with the CoNLL-like format
-#     """
-#     tokendict = doc.tokendict
-#     N = len(tokendict)
-#     fname = basename(fname) + '.edu'
-#     fname = join(wpath, fname)
-#     eduidx = 0
-#     with open(fname, 'w') as fout:
-#         for gidx in range(N):
-#             fout.write(str(eduidx) + '\n')
-#             if tokendict[gidx].boundary:
-#                 eduidx += 1
-#             if tokendict[gidx].send:
-#                 fout.write('\n')
-#     print 'Write segmentation: {}'.format(fname)

@@ -8,7 +8,7 @@
 import torch
 from config import *
 import torch.nn as nn
-from parser_model.gate_model import gate_model, bi_gate_model, tri_gate_model
+from parser_model.gate_model import tri_gate_model
 torch.manual_seed(SEED)
 
 
@@ -52,8 +52,8 @@ class Reducer(nn.Module):
             nn.Linear((self.hidden_size * 3 + EMBED_SIZE) * GATE_ANGLE_NUM, self.hidden_size * 5),
             nn.Dropout(p=mlp_dropout)
         )
-        self.gate = gate_model()
-        self.super_bi_gate = bi_gate_model()
+        # self.gate = gate_model()
+        # self.super_bi_gate = bi_gate_model()
         self.tri_gate = tri_gate_model()
         self.drop = nn.Dropout(p=mlp_dropout)
 

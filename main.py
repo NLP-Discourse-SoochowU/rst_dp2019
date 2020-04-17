@@ -7,12 +7,12 @@
 """
 from sys import argv
 from utils.rst_utils import *
-from parser_model.form_data import Builder
+# from parser_model.form_data import Builder
 from parser_model.trainer import Trainer
 
 
 if __name__ == "__main__":
-    builder = Builder()
+    # builder = Builder()
     # builder.form_trees_type_(type_="train")
     # builder.form_trees_type_(type_="dev")
     # builder.form_trees_type_(type_="test")

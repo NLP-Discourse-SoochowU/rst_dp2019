@@ -12,11 +12,6 @@ torch.manual_seed(SEED)
 
 
 class MLP(nn.Module):
-    """
-        多层感知器, 输入为hidden_size  不加入conn_tracker的情况
-        输入->隐藏层->dropout->activate->output logits
-    """
-
     def __init__(self, input_size=None, output_size=None, hidden_size=None, num_layers=None, use_sig=True):
         nn.Module.__init__(self)
         input_size = input_size if input_size is not None else mlp_input_size

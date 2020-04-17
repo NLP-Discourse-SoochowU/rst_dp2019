@@ -12,10 +12,6 @@ from path_config import WORD_FREQUENCY, VOC_WORD2IDS_PATH, WSJ_PATH
 
 
 def freq_count():
-    """
-
-    :return:
-    """
     word_c = 0
     word_freq_dict = dict()
     for folder_name in os.listdir(WSJ_PATH):
@@ -39,13 +35,6 @@ def freq_count():
 
 
 def freq2rate(word_freq_dict, word_all, word2ids):
-    """
-    将词典转成比例词典
-    :param word2ids:
-    :param word_all:
-    :param word_freq_dict:
-    :return:
-    """
     word_all = float(word_all)
     ids2rate = dict()
     for key, val in zip(word_freq_dict.keys(), word_freq_dict.values()):

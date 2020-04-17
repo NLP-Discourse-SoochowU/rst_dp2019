@@ -3,9 +3,7 @@
 """
 @Author: lyzhang
 @Date:
-@Description: 对EDU编码器的整理
-              attn_buffer在对EDU编码时用Bi-LSTM计算得到的隐层，存储。
-              attn_cache在对spinn模型进行forward时一步一步对area区域的attn结果的attention计算。
+@Description:
 """
 import torch
 import numpy as np
@@ -23,13 +21,13 @@ class edu_encoder:
         self.word2ids = word2ids
         self.wordemb = wordemb
         self.pos2ids = pos2ids
-        self.posemb = nn.Embedding(len(pos2ids.keys()), POS_EMBED_SIZE)  # 随机初始化pos_embed
+        self.posemb = nn.Embedding(len(pos2ids.keys()), POS_EMBED_SIZE)  # pos_embed
         # projections
         self.edu_proj = nn.Linear(EMBED_SIZE * 2 + POS_EMBED_SIZE + 2 * SPINN_HIDDEN, 2 * SPINN_HIDDEN)
 
         # gated_model
-        self.attn_buffer = deque()  # 存储edus_attention的初始情况
-        self.attn_cache = deque()  # 存储自底向上的过程
+        self.attn_buffer = deque()  # edus_attention
+        self.attn_cache = deque()
 
         # self attention
         edu_rnn_encoder_size = 2 * SPINN_HIDDEN
@@ -42,7 +40,7 @@ class edu_encoder:
             nn.Tanh()
         )
 
-        # attention for area attention, 注意这里的输入即为各个edu的编码隐藏层即为 2*hidden_size或者无监督的EMBED_SIZE
+        # attention for area attention
         area_rnn_encoder_size = EMBED_SIZE
         self.area_rnn_encoder = nn.LSTM(area_rnn_encoder_size, area_rnn_encoder_size)
         self.area_attn_query = nn.Parameter(torch.randn(area_rnn_encoder_size))
@@ -50,12 +48,10 @@ class edu_encoder:
             nn.Linear(area_rnn_encoder_size, area_rnn_encoder_size),
             nn.Tanh()
         )
-        self.area_tmp_attn_vec = None  # 当前area的attn结果向量
+        self.area_tmp_attn_vec = None
         self.proj_dropout = nn.Dropout(proj_dropout)
 
     def edu_bilstm_encode(self, word_emb, tags_emb):
-        """ 对 edu 双向 lstm 进行编码
-        """
         inputs = torch.cat([word_emb, tags_emb], 1).unsqueeze(1)  # (seq_len, batch, input_size)
         hs, _ = self.edu_rnn_encoder(inputs)  # hs.size()  (seq_len, batch, hidden_size)
         hs = hs.squeeze()  # size: (seq_len, hidden_size)
@@ -65,8 +61,6 @@ class edu_encoder:
         return output, attn
 
     def get_words_tag_ids(self, edu_ids, pos_ids):
-        """ 获取词等标签的 ids
-        """
         if len(edu_ids) == 1:
             w1 = edu_ids[0]
             w2 = self.word2ids[PAD]
@@ -98,8 +92,6 @@ class edu_encoder:
 
     @staticmethod
     def pad_edu(edu_ids=None, pos_ids=None):
-        """ 对 edu 进行 pad
-        """
         edu_ids_list = edu_ids[:]
         pos_ids_list = pos_ids[:] if pos_ids is not None else []
         while len(edu_ids_list) < PAD_SIZE:
@@ -131,11 +123,7 @@ class edu_encoder:
         return self.proj_dropout(proj_out)
 
     def area_attn_encode(self):
-        """ 对当前区域的所有 edu 的 attentions 进行 attn 获取并计算当前区域的注意力的注意力
-            area_edus_att: shape = (num of edu, 2 * SPINN_HIDDEN)
-        """
         tmp_area_info = self.attn_cache[-1]
-        # 是否数值累加反而能很好地表征群体本身
         self.area_tmp_attn_vec = torch.mean(tmp_area_info, 0)
 
     def edu2vec_unsupervised(self, edu_list, a: float = 1e-3):
@@ -156,17 +144,14 @@ class edu_encoder:
             vs = torch.unsqueeze(vs, 0)
             sentences = vs if sentences is None else torch.cat((sentences, vs), 0)
 
-        # 对sentence set进行主成分分析（降维）
         pca = PCA(n_components=EMBED_SIZE)
         pca.fit(sentences.data.numpy())  # np.array(sentences)
-        # the PCA vector，不需要这里更新，这是无监督计算方式
+        # the PCA vector
         u = pca.components_[0]
         u = np.multiply(u, np.transpose(u))  # uuT
-        # 当u小于embedding_size需要pad
         if len(u) < EMBED_SIZE:
             for i in range(EMBED_SIZE - len(u)):
                 u = np.append(u, 0)  # add needed extension for multiplication below
-        # resulting sentence vectors: vs = vs -u x uT x vs 与论文中一致
         for vs in sentences:
             sub = torch.mul(torch.FloatTensor(u), vs)
             self.attn_buffer.append(torch.sub(vs, sub))
@@ -174,8 +159,6 @@ class edu_encoder:
     def edu2vec_unsupervised_origin(self, edu_list, a: float = 1e-3):
         """ A SIMPLE BUT TOUGH TO BEAT BASELINE FOR SENTENCE EMBEDDINGS, Princeton University
             convert a list of sentence with word2vec items into a set of sentence vectors
-            :param edu_list: EDU列表
-            :param a: 超参
         """
         sentence_list = []
         for edu in edu_list:
@@ -193,14 +176,12 @@ class edu_encoder:
             vs = np.divide(vs, len(edu.temp_edu_ids))
             sentence_list.append(vs)
 
-        # 对sentence set进行主成分分析（降维）
         pca = PCA(n_components=EMBED_SIZE)
         pca.fit(np.array(sentence_list))
         # the PCA vector
         u = pca.components_[0]
         u = np.multiply(u, np.transpose(u))  # uuT
 
-        # 当u小于embedding_size需要pad
         if len(u) < EMBED_SIZE:
             for i in range(EMBED_SIZE - len(u)):
                 u = np.append(u, 0)  # add needed extension for multiplication below

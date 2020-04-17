@@ -22,34 +22,26 @@ class Metrics(object):
         self.nuc_perf_inner = []
         self.rel_perf_inner = []
         self.f_perf_inner = []
-        # 存储总数
         self.true_all = [0., 0., 0., 0.]  # span nucl rel f
         self.true_all_inner = [0., 0., 0., 0.]  # span nucl rel f
         self.span_all = 0.
         self.span_all_inner = 0.
 
-        # dev数据集最大值存储
         self.dev_span_max = [0, 0, 0, 0]  # mi Inner_mi ma Inner_ma
         self.dev_nucl_max = [0, 0, 0, 0]
         self.dev_rel_max = [0, 0, 0, 0]
         self.dev_f_max = [0, 0, 0, 0]
 
-        # test数据集最大值存储
         self.test_span_max = [0, 0, 0, 0]  # mi Inner_mi ma Inner_ma
         self.test_nucl_max = [0, 0, 0, 0]
         self.test_rel_max = [0, 0, 0, 0]
         self.test_f_max = [0, 0, 0, 0]
 
-        # 提供准确率的存储，提供拟合的数据分析工作
         self.span_perf_long = [[], [], [], []]  # mi Inner_mi ma Inner_ma
         self.nucl_perf_long = [[], [], [], []]
         self.rel_perf_long = [[], [], [], []]
 
     def init_all(self):
-        """
-        初始化，为宏、微平均计算提供支持
-        :return:
-        """
         # micro
         self.true_all = [0., 0., 0., 0.]
         self.span_all = 0.
@@ -66,22 +58,12 @@ class Metrics(object):
         self.f_perf_inner = []
 
     def eval_(self, goldtrees, predtrees, model, type_="dev", save_per=False):
-        """
-        评测主函数，针对dev集合如果找到更好的模型，返回True作为test集合学习的继续
-        :param save_per:
-        :param type_: 默认开发集
-        :param goldtrees:
-        :param predtrees:
-        :param model:
-        :return:
-        """
-        self.init_all()  # 初始化
+        self.init_all()
         for idx in range(len(goldtrees)):
             goldspan_ids, goldspan_ns_ids, goldspan_rel_ids, inner_goldspan_ids, inner_goldspan_ns_ids, \
                 inner_goldspan_rel_ids = self.get_all_span_info(goldtrees[idx])
             predspan_ids, predspan_ns_ids, predspan_rel_ids, inner_predspan_ids, inner_predspan_ns_ids, \
                 inner_predspan_rel_ids = self.get_all_span_info(predtrees[idx])
-            # 对当前篇章评测计算
             self.eval_all(goldspan_ids, predspan_ids, goldspan_ns_ids, predspan_ns_ids, goldspan_rel_ids,
                           predspan_rel_ids, inner_goldspan_ids, inner_predspan_ids, inner_goldspan_ns_ids,
                           inner_predspan_ns_ids, inner_goldspan_rel_ids, inner_predspan_rel_ids,
@@ -92,18 +74,10 @@ class Metrics(object):
     def eval_all(self, goldspan_ids, predspan_ids, goldspan_ns_ids, predspan_ns_ids, goldspan_rel_ids, predspan_rel_ids,
                  inner_goldspan_ids, inner_predspan_ids, inner_goldspan_ns_ids, inner_predspan_ns_ids,
                  inner_goldspan_rel_ids, inner_predspan_rel_ids, file_name=None):
-        """
-        compute the number of span in gold and pred for F and P.
-        goldspan_ids: 包含所有span的ids
-        inner_goldspan_ids:  各个内部节点中标签不为span的节点区域对应id
-        :return:
-        """
         # span
-        # 获取包含叶节点的所有预测正确的span并对span打标签与标准和预测树中对应位置一一对应
         allspan = [span for span in goldspan_ids if span in predspan_ids]
         allspan_gold_idx = [goldspan_ids.index(span) for span in allspan]
         allspan_pred_idx = [predspan_ids.index(span) for span in allspan]
-        # 关于标准Parseval部分
         allspan_inner = [span for span in inner_goldspan_ids if span in inner_predspan_ids]
         allspan_inner_gold_idx = [inner_goldspan_ids.index(span) for span in allspan_inner]
         allspan_inner_pred_idx = [inner_predspan_ids.index(span) for span in allspan_inner]
@@ -117,47 +91,32 @@ class Metrics(object):
         # rel
         all_goldspan_rel = [goldspan_rel_ids[idx] for idx in allspan_gold_idx]
         all_predspan_rel = [predspan_rel_ids[idx] for idx in allspan_pred_idx]
-        # 标准评测部分
         all_inner_goldspan_rel = [inner_goldspan_rel_ids[idx] for idx in allspan_inner_gold_idx]
         all_inner_predspan_rel = [inner_predspan_rel_ids[idx] for idx in allspan_inner_pred_idx]
 
-        # 将all和inner写成bracket方式
         # self.write_bracket_all(allspan, all_goldspan_ns, all_goldspan_rel, all_predspan_ns, all_predspan_rel,
         #                        allspan_inner, all_inner_goldspan_ns, all_inner_goldspan_rel, all_inner_predspan_ns,
         #                        all_inner_predspan_rel, file_name)
 
         # macro & micro
-        # (所有预测正确的span, 所有span个数)
         true_len, span_len = float(len(allspan)), float(len(goldspan_ids))
         self.compute_macro_micro_original(true_len, span_len, all_goldspan_ns, all_predspan_ns, all_goldspan_rel,
                                           all_predspan_rel)
-        # (预测正确的内部节点的span, 内部节点所有span个数）
         true_len, span_len = float(len(allspan_inner)), float(len(inner_goldspan_ids))
         self.compute_macro_micro_parseval(true_len, span_len, all_inner_goldspan_ns, all_inner_predspan_ns,
                                           all_inner_goldspan_rel, all_inner_predspan_rel)
 
     def compute_macro_micro_original(self, true_len, span_len, all_goldspan_ns, all_predspan_ns, all_goldspan_rel,
                                      all_predspan_rel):
-        """
-        :param true_len: 当前识别正确的 span 列表长度，不包含叶节点
-        :param span_len: span用于计算 nuclearity 和 relation 的准确率
-        :param all_goldspan_ns: 对于当前标准树中所有预测正确的 span，各个 span 对应的 nuclearity 标签 ids
-        :param all_predspan_ns: 对于当前预测树中所有预测正确的 span，各个 span 对应的 nuclearity 标签 ids
-        :param all_goldspan_rel: ...
-        :param all_predspan_rel: ...
-        :return:
-        """
         ns_equal = np.equal(all_goldspan_ns, all_predspan_ns)
         rel_equal = np.equal(all_goldspan_rel, all_predspan_rel)
         f_equal = [ns_equal[idx] and rel_equal[idx] for idx in range(len(ns_equal))]
-        # 相等的几个评测参数分别去除root
         ns_equal_all = sum(ns_equal) - 1
         rel_equal_all = sum(rel_equal) - 1
         f_equal_all = sum(f_equal) - 1
         true_len -= 1
         span_len -= 1
         p_span = true_len / span_len
-        # 对于All，关系标签在每个节点上，在每个span上，但是去除root上面的（同时去除识别结果和span总数）
         p_ns = ns_equal_all / span_len
         p_rel = rel_equal_all / span_len
         p_f = f_equal_all / span_len
@@ -168,10 +127,9 @@ class Metrics(object):
         self.f_perf.append(p_f)
         #  micro
         self.true_all[0] += true_len
-        self.true_all[1] += ns_equal_all  # 相同span上NS也相同的个数(不包含root)
-        self.true_all[2] += rel_equal_all  # 相同span上rel同（不包含root）
-        self.true_all[3] += f_equal_all  # 相同span上NS和rel都相同（不包含root）
-        # 总数累加
+        self.true_all[1] += ns_equal_all
+        self.true_all[2] += rel_equal_all
+        self.true_all[3] += f_equal_all
         self.span_all += span_len
 
     def compute_macro_micro_parseval(self, true_len, span_len, all_goldspan_ns, all_predspan_ns, all_goldspan_rel,
@@ -179,36 +137,27 @@ class Metrics(object):
         ns_equal = np.equal(all_goldspan_ns, all_predspan_ns)
         rel_equal = np.equal(all_goldspan_rel, all_predspan_rel)
         f_equal = [ns_equal[idx] and rel_equal[idx] for idx in range(len(ns_equal))]
-        # 各个span张都标注了关系，不必去除root对应的span
         ns_equal_all = sum(ns_equal)
         rel_equal_all = sum(rel_equal)
         f_equal_all = sum(f_equal)
-        # span预测仍需去除root
         p_span = true_len / span_len
         p_ns = ns_equal_all / span_len
         p_rel = rel_equal_all / span_len
         p_f = f_equal_all / span_len
         # macro
         self.span_perf_inner.append(p_span)
-        self.nuc_perf_inner.append(p_ns)  # 相同span上NS也相同的个数(包含root)
-        self.rel_perf_inner.append(p_rel)  # 相同span上rel相同（包含root）
+        self.nuc_perf_inner.append(p_ns)
+        self.rel_perf_inner.append(p_rel)
         self.f_perf_inner.append(p_f)
         # micro
         self.true_all_inner[0] += true_len
         self.true_all_inner[1] += ns_equal_all
         self.true_all_inner[2] += rel_equal_all
         self.true_all_inner[3] += f_equal_all
-        # span和其他预测分别累加span个数（每棵树的span预测不包含root）
         self.span_all_inner += span_len
 
     @staticmethod
     def get_all_span_info(tree_):
-        """
-        获取每棵树的各自的 span_ids，同时给出不包含 SPAN关系的 SPAN 列表 (分别供 span 和 (nucl, rel) 的预测 )
-        修正：对于关系等标签写在父节点上面的情况，获取span的时候只需要获取内部节点和根节点即可，不用纠结span标签
-        :param tree_: 对当前一个tree获取所有信息
-        :return:
-        """
         # rel2ids = load_data(REL_coarse2ids)
         span_ids = []
         span_ns_ids = []
@@ -218,22 +167,18 @@ class Metrics(object):
         inner_r_rel_ids = []
         for node in tree_.nodes:
             if node.left_child is not None and node.right_child is not None:
-                inner_span_ids.append(node.temp_edu_span)  # 获取内部节点中为核心的节点的区域或者root涵盖的区域
-                inner_span_ns_ids.append(nucl2ids[node.child_NS_rel])  # 将所有内部节点的所有ns的ids进行搜集
-                inner_r_rel_ids.append(coarse2ids[node.child_rel])  # 搜集rel不是"span"的所有节点对应的rel的ids
+                inner_span_ids.append(node.temp_edu_span)
+                inner_span_ns_ids.append(nucl2ids[node.child_NS_rel])
+                inner_r_rel_ids.append(coarse2ids[node.child_rel])
             span_ids.append(node.temp_edu_span)
             span_ns_ids.append(ns_dict[node.type])
             span_rel_ids.append(coarse2ids[node.rel])
         return span_ids, span_ns_ids, span_rel_ids, inner_span_ids, inner_span_ns_ids, inner_r_rel_ids
 
     def get_all_max(self, type_="dev"):
+        """ span_max, nucl_max, rel_max, f_max
+            span_max: (mi inner_mi ma inner_ma)
         """
-        span_max, nucl_max, rel_max, f_max
-        span_max: (mi inner_mi ma inner_ma)
-        :param type_:
-        :return:
-        """
-        # 针对两种指标的最大值更新程序
         span_max = [self.test_span_max[idx] for idx in range(4)] if type_ == "test" else \
             [self.dev_span_max[idx] for idx in range(4)]
 
@@ -248,10 +193,7 @@ class Metrics(object):
         return span_max, nucl_max, rel_max, f_max
 
     def update_all_max(self, span_pre, nucl_pre, rel_pre, f_pre, span_max, nucl_max, rel_max, f_max, rep_info, type_):
-        """
-        根据xxx_pre和xxx_max对比更新最大值存储
-        span_pre: (mi inner_mi ma inner_ma)
-        :return:
+        """ span_pre: (mi inner_mi ma inner_ma)
         """
         better = False
         for idx in range(4):
@@ -290,9 +232,6 @@ class Metrics(object):
         return better
 
     def report(self, model, type_="dev", predtrees=None, save_per=False):
-        """
-            汇总计算：根据计算结果进行最大值跟新和模型存储, 对模型最大值更新时得到的准确率在dev和test上的得分分别统计，分析
-        """
         report_info = []
         # === All ===
         # macro
@@ -308,24 +247,20 @@ class Metrics(object):
         p_span_r_micro = self.true_all_inner[0] / self.span_all_inner
         p_ns_r_micro, p_rel_r_micro, p_f_r_micro = (self.true_all_inner[idx] / self.span_all_inner for idx
                                                     in range(1, 4))
-        # 获取历史最大值：span_max: (mi inner_mi ma inner_ma)
+        # span_max: (mi inner_mi ma inner_ma)
         span_max, nucl_max, rel_max, f_max = self.get_all_max(type_=type_)
 
-        # 整合当前预测值 (mi inner_mi ma inner_ma)
+        # (mi inner_mi ma inner_ma)
         span_pre = [p_span_micro, p_span_r_micro, p_span_macro, p_span_r_macro]
         nucl_pre = [p_ns_micro, p_ns_r_micro, p_ns_macro, p_ns_r_macro]
         rel_pre = [p_rel_micro, p_rel_r_micro, p_rel_macro, p_rel_r_macro]
         f_pre = [p_f_micro, p_f_r_micro, p_f_macro, p_f_r_macro]
         if save_per:
-            self.update_per_long(span_pre, nucl_pre, rel_pre)  # 开启交叉验证则存dev上面的准确率变化，否则存测试集合
-        # 下面对最大值更新
+            self.update_per_long(span_pre, nucl_pre, rel_pre)
         better = self.update_all_max(span_pre, nucl_pre, rel_pre, f_pre, span_max, nucl_max, rel_max, f_max, report_info
                                      , type_)
-        # 模型存储
         self.save_best_models(span_pre, nucl_pre, rel_pre, f_pre, span_max, nucl_max, rel_max, f_max, model, type_,
                               predtrees)
-        # self.output_report(report_info)
-        # 判定开发集是否得到更好的模型
         return better
 
     def update_per_long(self, span_pre, nucl_pre, rel_pre):
@@ -336,10 +271,6 @@ class Metrics(object):
 
     def save_best_models(self, span_pre, nucl_pre, rel_pre, f_pre, span_max, nucl_max, rel_max, f_max, model, type_,
                          predtrees):
-        """
-        待完善，最后决定只对micro_inner选到最好的模型进行存储
-        :return:
-        """
         if SAVE_MODEL:
             span_file_name = "/test_span_max_model.pth" if type_ == "test" else "/dev_span_max_model.pth"
             span_best_trees_parsed = "/test_span_trees.pkl" if type_ == "test" else "/dev_span_trees.pkl"
@@ -381,10 +312,6 @@ class Metrics(object):
         save_data(trees, save_path)
 
     def output_report(self, report_info=None):
-        """
-        打印中途预测信息
-        :return:
-        """
         for info in report_info:
             print_(info, self.log_file)
 
@@ -397,7 +324,6 @@ class Metrics(object):
                            file_name=file_name, type_="inner")
         self.write_bracket(allspan_inner, all_inner_predspan_ns, all_inner_predspan_rel, BRACKET_INNER_PATH + ".pre",
                            file_name=file_name, type_="inner")
-        input("write ok")
 
     @staticmethod
     def write_bracket(span, ns, rel, file_path, file_name=None, type_="all"):
@@ -410,9 +336,7 @@ class Metrics(object):
         write_iterate(lines, file_path)
 
     def get_scores(self):
-        """
-        (mi, inner_mi, ma, inner_ma)
-        :return:
+        """ (mi, inner_mi, ma, inner_ma)
         """
         report_info = []
         if CROSS_VAL:

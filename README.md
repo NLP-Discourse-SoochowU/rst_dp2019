@@ -3,16 +3,14 @@
 <b>-- General Information</b>
 ```
    1. This RST-style discourse parser produces discourse tree structure on full-text level, given a raw text.
-   2. This work explores the interal node representation learning with respect to tree depth. As shown in Figure 2, 
+   2. This work explores the interal node representation learning with respect to tree depth. As shown in Figure 3, 
    this work finds that our model prefers state transition information and the principle component of text spans when 
    EDU number of text span grows larger (a higher tree). 
-```
-![Image text](https://github.com/NLP-Discourse-SoochowU/rst_dp2019/blob/master/data/img/fg1.png)
-```
    As shown in Figure 4, this work also finds that a better representation (with automatic information flow 
    incorporation), the proposed parser obtains better performance for upper-layer tree nodes.
 ```
-![Image text](https://github.com/NLP-Discourse-SoochowU/rst_dp2019/blob/master/data/img/fg2.png)
+![Image text](https://github.com/NLP-Discourse-SoochowU/rst_dp2019/blob/master/data/img/fg.png)
+
 
 <b>-- Required Packages</b>
 ```

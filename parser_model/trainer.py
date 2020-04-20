@@ -159,7 +159,7 @@ class Trainer:
                             self.skip_boundary += SKIP_BOUNDARY
                         p.start(self.skip_steps)
                         pro_idx = 1
-        self.save_eval_data()
+        # self.save_eval_data()
 
     def evaluate(self, trees_eval_path, type_="test", save_per=False):
         self.model.eval()
@@ -198,9 +198,9 @@ class Trainer:
                 print_(info, self.log_file, write_=False)
         self.count_write += 1
 
-    def save_eval_data(self):
-        save_data((self.metric.span_perf_long, self.metric.nucl_perf_long, self.metric.rel_perf_long), DEV_DISTRIBUTE)
-        print_("the precision of both dev & test have been saved.", self.log_file)
+    # def save_eval_data(self):
+    #     save_data((self.metric.span_perf_long, self.metric.nucl_perf_long, self.metric.rel_perf_long), DEV_DISTRIBUTE)
+    #     print_("the precision of both dev & test have been saved.", self.log_file)
 
     @staticmethod
     def restore(folder):

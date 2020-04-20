@@ -29,10 +29,7 @@ class parse:
         self.segmentation()
         # 生成 tree_obj对象
         builder = Builder()
-        if not LOAD_TEST:
-            parse_trees = builder.build_tree_obj_list()
-        else:
-            parse_trees = load_data(RST_TEST_TREES)
+        parse_trees = builder.build_tree_obj_list()
         parse_model = Parser()
         parse_model.parse(parse_model=self.model, parse_data=parse_trees)
 

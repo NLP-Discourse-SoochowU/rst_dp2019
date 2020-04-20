@@ -30,8 +30,10 @@
 ```
    1. Prepare your raw documents in data/raw_txt in the format of *.out
    2. Run the Stanford CoreNLP with the given bash script corpus_rst.sh using the command "./corpus_rst.sh "
+      If you use other data-driven segmenters like SEGBOT for EDU segmentation then you do not need 
+      to perform the action in step 2.
    3. Run parser.py to parse these raw documents into objects of rst_tree class (Wrap them into trees).
-      - segmentation
+      - segmentation (or you can use your own EDU segmenter)
       - wrap them into trees, saved in "data/trees_parsed/trees_list.pkl"
    4. Run drawer.py to draw those trees out by NLTK
    Note: We did not provide parser codes and it can be easily implemented referring to our previous project.

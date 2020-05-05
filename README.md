@@ -6,7 +6,7 @@
    2. This work explores the interal node representation learning with respect to tree depth. As shown in Figure 3, 
    this work finds that our model prefers state transition information and the principle component of text spans when 
    EDU number of text span grows larger (a higher tree). 
-   As shown in Figure 4, this work also finds that a better representation (with automatic information flow 
+   As shown in Figure 4, this work also finds that with better representation (automatic information flow 
    incorporation), the proposed parser obtains better performance for upper-layer tree nodes.
 ```
 ![Image text](https://github.com/NLP-Discourse-SoochowU/rst_dp2019/blob/master/data/img/fg.png)

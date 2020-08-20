@@ -20,7 +20,7 @@
    stanfordcorenlp==3.9.1.1
 ```
 
-<b>-- Training Your Own RST Parser</b>
+<b>-- Train Your Own RST Parser</b>
 ```
     Run main.py
 

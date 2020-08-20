@@ -5,7 +5,7 @@
    1. This RST-style discourse parser produces discourse tree structure on full-text level, given a raw text.
    2. This work explores the interal node representation learning with respect to tree depth. As shown in Figure 3, 
    this work finds that our model prefers state transition information and the principle component of text spans when 
-   EDU number of text span grows larger (a higher tree). 
+   EDU number of text span grows larger (a deeper tree). 
    As shown in Figure 4, this work also finds that with better representation (automatic information flow 
    incorporation), the proposed parser obtains better performance for upper-layer tree nodes.
 ```
